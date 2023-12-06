@@ -2,31 +2,40 @@ import * as readline from 'readline';
 
 export class GameList {
     private sumOfPossibleGameIds = 0;
+    private aSumOfPowersOfCubes = 0;
 
     constructor(readInterface: readline.Interface) {
       
         readInterface.on('line', (line) => {
             let x: Game = new Game(line);
+            this.aSumOfPowersOfCubes += x.powerOfCubes();
             if(x.isValid()) {
                 this.sumOfPossibleGameIds += x.gameNumber();
             }
         });
         
         readInterface.on('close', () => {
-            console.log(this.sumOfPossibleGameIds);
+            // console.log(this.sumOfPossibleGameIds);
         });
     }
     
     public sumOfValidGameIds(): number {
         return this.sumOfPossibleGameIds;
     }
+
+    public sumOfPowersOfCubes(): number {   
+        return this.aSumOfPowersOfCubes;
+    }
 }
 
 export class Game {
-
+   
     private sets: GameSet[] = [];
     private gameNumberInt: number = 0;
     private isValidBool: boolean = true;
+    private minimalAmountOfBlueCubes: number = 0;
+    private minimalAmountOfRedCubes: number = 0;
+    private minimalAmountOfGreenCubes: number = 0;
 
     constructor(line: string) {
         let x = line.split(':');
@@ -35,9 +44,12 @@ export class Game {
         this.gameNumberInt = parseInt(x[0].replace('Game ', ''));
         
         setStrings.forEach(setString => {
-            this.sets.push(new GameSet(setString));
+            let aGameSet = new GameSet(setString)
+            this.sets.push(aGameSet);
+
+            this.setMinimalAmounts(aGameSet);
+            this.setValidity(aGameSet);
         });
-        this.setValidity();
     }
 
     public amountOfSets() {
@@ -52,12 +64,33 @@ export class Game {
         return this.isValidBool;
     }
 
-    private setValidity() {
-        this.sets.forEach(set => {        
-            if ( ! set.isValid()) {
-                this.isValidBool = false;
-            }
-        });
+    public powerOfCubes(): number {
+        return this.minimalAmountOfBlueCubes * this.minimalAmountOfRedCubes * this.minimalAmountOfGreenCubes;       
+    }
+
+    public getMinimalBlue(): number {
+        return this.minimalAmountOfBlueCubes;
+    }
+
+    public getMinimalRed(): number {
+        return this.minimalAmountOfRedCubes;
+    }
+
+    public getMinimalGreen(): number {
+        return this.minimalAmountOfGreenCubes;
+    }
+
+    private setValidity(aGameSet: GameSet) {
+        if ( ! aGameSet.isValid()) {
+            this.isValidBool = false;
+        }
+    }
+    
+    private setMinimalAmounts(aGameSet : GameSet) {
+        this.minimalAmountOfBlueCubes = Math.max(this.minimalAmountOfBlueCubes, aGameSet.numberOfBlueCubes());
+        this.minimalAmountOfRedCubes = Math.max(this.minimalAmountOfRedCubes, aGameSet.numberOfRedCubes());
+        this.minimalAmountOfGreenCubes = Math.max(this.minimalAmountOfGreenCubes, aGameSet.numberOfGreenCubes());
+    
     }
 }
 
@@ -71,9 +104,9 @@ export class GameSet {
     readonly green: string = 'green';
     readonly blue: string = 'blue';
 
-    private numberOfRedCubes: number = 0;
-    private numberOfGreenCubes: number = 0;
-    private numberOfBlueCubes: number = 0;
+    private theNumberOfRedCubes: number = 0;
+    private theNumberOfGreenCubes: number = 0;
+    private theNumberOfBlueCubes: number = 0;
 
     private validity: boolean = false;
 
@@ -87,8 +120,20 @@ export class GameSet {
         return this.validity;
     }
 
+    public numberOfRedCubes(): number {
+        return this.theNumberOfRedCubes;
+    }
+
+    public numberOfGreenCubes(): number {
+        return this.theNumberOfGreenCubes;
+    }
+
+    public numberOfBlueCubes(): number {
+        return this.theNumberOfBlueCubes;
+    }
+
     private setValidity() {
-        if (this.numberOfRedCubes > this.maxRedCubes || this.numberOfGreenCubes > this.maxGreenCubes || this.numberOfBlueCubes > this.maxBlueCubes) {
+        if (this.theNumberOfRedCubes > this.maxRedCubes || this.theNumberOfGreenCubes > this.maxGreenCubes || this.theNumberOfBlueCubes > this.maxBlueCubes) {
             this.validity = false;
         } else {
             this.validity = true;
@@ -104,15 +149,15 @@ export class GameSet {
             let amount = parseInt(colorAndAmountArray[0]);
 
             if (color === this.red) {
-                this. numberOfRedCubes = amount;
+                this.theNumberOfRedCubes = amount;
             }
 
             if (color === this.green) {
-                this.numberOfGreenCubes = amount;
+                this.theNumberOfGreenCubes = amount;
             }
 
             if (color === this.blue) {
-                this.numberOfBlueCubes = amount;
+                this.theNumberOfBlueCubes = amount;
             }
         });
     }

@@ -120,3 +120,36 @@ test('it invalidates blue', () => {
     );
     expect(x.isValid()).toBe(false);
 });
+
+// challenge two
+
+test('it can find the smallest amounts of cubes per color', () => {   
+    let x: Game = new Game(
+        "Game 4: 1 green, 0 red, 3 blue; 3 green, 2 red, 1 blue"
+    );
+    expect(x.getMinimalGreen()).toBe(3);
+    expect(x.getMinimalRed()).toBe(2);
+    expect(x.getMinimalBlue()).toBe(3);
+});
+
+
+test('it can find the power of the smallest amounts of cubes per color', () => {   
+    let x: Game = new Game(
+        "Game 4: 1 green, 0 red, 3 blue; 3 green, 2 red, 1 blue"
+    );
+    expect(x.powerOfCubes()).toBe(18) // 3 * 2 * 3;
+});
+
+
+test('it can find the power of the smallest amounts of cubes per color', async () => {   
+    let inputString = "Game 4: 1 green, 0 red, 3 blue; 3 green, 2 red, 1 blue\nGame 5: 2 green, 2 red, 2 blue; 3 green, 3 red, 3 blue";
+        let readInterface = readline.createInterface({
+        input: Readable.from(inputString),
+        output: process.stdout,
+        terminal: false
+    })
+    let x: GameList = new GameList(readInterface);
+
+    await new Promise(resolve => readInterface.on('close', resolve));
+    expect(x.sumOfPowersOfCubes()).toBe(45) // 3 * 2 * 3 + 3 * 3 * 3 = 18 + 27 = 45;
+});

@@ -13,6 +13,7 @@ export function two() {
 
     readInterface.on('close', () => {
         console.log(ListOfGames.sumOfValidGameIds());
+        console.log(ListOfGames.sumOfPowersOfCubes());
     });
 
 }
